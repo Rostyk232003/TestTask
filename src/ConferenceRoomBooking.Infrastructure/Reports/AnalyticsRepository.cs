@@ -29,7 +29,7 @@ public class AnalyticsRepository : IAnalyticsRepository
     List<Booking> bookings = await this._context.Bookings
       .AsNoTracking()
       .Include(x => x.BookingServices)
-      .Where(x => x.StartsAt < endDate && x.EndsAt > startDate && x.Status != "Cancelled")
+      .Where(x => x.StartsAt < endDate && x.EndsAt > startDate && x.Status != BookingStatus.Cancelled)
       .ToListAsync(cancellationToken);
 
     return new AnalyticsData

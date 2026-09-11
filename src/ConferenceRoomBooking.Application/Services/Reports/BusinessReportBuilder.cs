@@ -44,7 +44,7 @@ public class BusinessReportBuilder : IReportBuilder
     {
       decimal availableHours = this.CalculateAvailableHours(this._report.StartDate, this._report.EndDate);
       decimal bookedHours = bookings
-        .Where(x => x.HallId == hall.Id && x.Status != "Cancelled")
+        .Where(x => x.HallId == hall.Id && x.Status != BookingStatus.Cancelled)
         .Sum(x => this.CalculateWorkingHours(x.StartsAt, x.EndsAt, this._report.StartDate, this._report.EndDate));
       decimal occupancy = availableHours == 0m ? 0m : decimal.Round(bookedHours / availableHours * 100m, 2);
 
@@ -122,7 +122,7 @@ public class BusinessReportBuilder : IReportBuilder
 
   private List<Booking> GetActiveBookings(List<Booking> bookings)
   {
-    return bookings.Where(x => x.Status != "Cancelled").ToList();
+    return bookings.Where(x => x.Status != BookingStatus.Cancelled).ToList();
   }
 
   private decimal CalculateAvailableHours(DateTime startDate, DateTime endDate)

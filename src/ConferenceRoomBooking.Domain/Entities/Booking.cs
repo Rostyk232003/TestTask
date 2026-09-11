@@ -16,7 +16,7 @@ public class Booking
     this.StartsAt = startsAt;
     this.EndsAt = endsAt;
     this.TotalPrice = totalPrice;
-    this.Status = "Booked";
+    this.Status = BookingStatus.Booked;
     this.CreatedAt = DateTime.UtcNow;
   }
 
@@ -27,7 +27,7 @@ public class Booking
     this.StartsAt = DateTime.UtcNow;
     this.EndsAt = DateTime.UtcNow;
     this.TotalPrice = 0m;
-    this.Status = "Booked";
+    this.Status = BookingStatus.Booked;
     this.CreatedAt = DateTime.UtcNow;
   }
 
@@ -41,7 +41,7 @@ public class Booking
 
   public decimal TotalPrice { get; private set; }
 
-  public string Status { get; private set; }
+  public BookingStatus Status { get; private set; }
 
   public DateTime CreatedAt { get; private set; }
 
@@ -54,6 +54,6 @@ public class Booking
   /// </summary>
   public void Cancel()
   {
-    this.Status = "Cancelled";
+    this.Status = BookingStatus.Cancelled;
   }
 }

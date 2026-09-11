@@ -25,7 +25,7 @@ public class GetAvailableHallsQueryHandler : IRequestHandler<GetAvailableHallsQu
 
     foreach (Hall hall in halls)
     {
-      bool overlaps = hall.Bookings.Any(x => x.Status != "Cancelled" && x.StartsAt < query.EndTime && x.EndsAt > query.StartTime);
+      bool overlaps = hall.Bookings.Any(x => x.Status != BookingStatus.Cancelled && x.StartsAt < query.EndTime && x.EndsAt > query.StartTime);
       if (!hall.IsActive || hall.Capacity < query.Capacity || overlaps)
       {
         continue;

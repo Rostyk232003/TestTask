@@ -31,7 +31,7 @@ public class BookingRepository : IBookingRepository
     try
     {
       bool overlaps = await this._context.Bookings.AnyAsync(
-        x => x.HallId == booking.HallId && x.Status != "Cancelled" && x.StartsAt < endsAt && x.EndsAt > startsAt,
+        x => x.HallId == booking.HallId && x.Status != BookingStatus.Cancelled && x.StartsAt < endsAt && x.EndsAt > startsAt,
         cancellationToken);
 
       if (overlaps)
@@ -60,7 +60,7 @@ public class BookingRepository : IBookingRepository
   {
     return await this._context.Bookings
         .AsNoTracking()
-        .Where(x => x.HallId == hallId && x.Status != "Cancelled" && x.StartsAt < endsAt && x.EndsAt > startsAt)
+        .Where(x => x.HallId == hallId && x.Status != BookingStatus.Cancelled && x.StartsAt < endsAt && x.EndsAt > startsAt)
         .ToListAsync(cancellationToken);
   }
 

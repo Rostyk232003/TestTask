@@ -26,7 +26,7 @@ public class DeleteHallCommandHandler : IRequestHandler<DeleteHallCommand>
       throw new NotFoundException("Hall was not found.");
     }
 
-    bool hasFutureBookings = hall.Bookings.Any(x => x.Status != "Cancelled" && x.EndsAt > DateTime.UtcNow);
+    bool hasFutureBookings = hall.Bookings.Any(x => x.Status != BookingStatus.Cancelled && x.EndsAt > DateTime.UtcNow);
     if (hasFutureBookings)
     {
       throw new ConflictException("Hall has active future bookings.");

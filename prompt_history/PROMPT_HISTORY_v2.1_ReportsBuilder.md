@@ -3,7 +3,9 @@
 # Історія промптів: Reports and Analytics
 
 ## Стан: [Активна]
+
 ## Версія: v2.1
+
 ## Дата: 2026-09-11
 
 ## Аналіз UML
@@ -26,21 +28,26 @@ Application не повинен посилатися на `AppDbContext`.
 ## ToT-вибір
 
 ### V1 — CQRS Queries без Builder
+
 Кожен query одразу формує власний DTO.
 
 Переваги:
+
 - найменше коду;
 - проста реалізація.
 
 Недоліки:
+
 - handler змішує отримання даних і побудову звіту;
 - складніше додавати JSON/CSV/PDF або інші види звітів;
 - слабше відповідає наданій UML.
 
 ### V2 — CQRS + Builder + Director
+
 Handler отримує агреговані дані через `IAnalyticsRepository`, Director викликає Builder, а Builder формує `BusinessReport`.
 
 Переваги:
+
 - відповідає UML;
 - дотримується SRP;
 - зберігає Clean Architecture;
@@ -48,16 +55,20 @@ Handler отримує агреговані дані через `IAnalyticsRepos
 - зручно тестувати окремо запити, Builder і фінальний DTO.
 
 Недоліки:
+
 - більше класів;
 - Director потрібен лише для стандартного сценарію.
 
 ### V3 — Повноцінний configurable report engine
+
 Додатково додати каталог секцій, динамічні фільтри та формати експорту.
 
 Переваги:
+
 - максимальна розширюваність.
 
 Недоліки:
+
 - надмірно складно для поточного MVP;
 - збільшує ризик зайвої абстракції.
 
@@ -66,6 +77,7 @@ Handler отримує агреговані дані через `IAnalyticsRepos
 Обрано V2: `CQRS Query + IAnalyticsRepository + ReportDirector + Builder`.
 
 Поточний scope:
+
 - JSON endpoint;
 - один стандартний бізнес-звіт;
 - період `StartDate`–`EndDate`;
@@ -379,10 +391,10 @@ Builder і Director повинні мати lifetime `Scoped` або `Transient`
 - `dotnet build ConferenceRoomBooking.sln --nologo` — успішно;
 - `dotnet test ConferenceRoomBooking.sln --nologo` — 9/9 тестів успішно;
 - реальний HTTP-запит `GET /api/reports/business` повернув:
-    - `TotalRevenue = 4900`;
-    - `TotalBookings = 1`;
-    - Projector: `UsageCount = 1`, `Revenue = 500`;
-    - occupancy для періоду з робочим часом `06:00–23:00`.
+  - `TotalRevenue = 4900`;
+  - `TotalBookings = 1`;
+  - Projector: `UsageCount = 1`, `Revenue = 500`;
+  - occupancy для періоду з робочим часом `06:00–23:00`.
 
 ## Фінальний prompt
 

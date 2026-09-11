@@ -3,6 +3,8 @@
 using System.Text.Json;
 using FluentValidation;
 using ConferenceRoomBooking.Application.Exceptions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.API.Middleware;
 
@@ -36,6 +38,21 @@ public class ExceptionHandlingMiddleware
     catch (UnprocessableEntityException exception)
     {
       await this.WriteErrorAsync(context, StatusCodes.Status422UnprocessableEntity, new List<string> { exception.Message });
+    }
+    catch (DbUpdateConcurrencyException exception)
+    {
+      ILogger<ExceptionHandlingMiddleware> logger = context.RequestServices.GetRequiredService<ILogger<ExceptionHandlingMiddleware>>();
+      logger.LogWarning(exception, "Concurrency conflict for {Path}", context.Request.Path);
+      await this.WriteErrorAsync(context, StatusCodes.Status409Conflict, new List<string> { "The resource was changed or deleted. Reload it and try again." });
+    }
+    catch (Exception exception)
+    {
+      ILogger<ExceptionHandlingMiddleware> logger = context.RequestServices.GetRequiredService<ILogger<ExceptionHandlingMiddleware>>();
+      logger.LogError(exception, "Unhandled API exception for {Path}", context.Request.Path);
+      List<string> errors = context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment()
+        ? new List<string> { exception.Message }
+        : new List<string> { "An unexpected error occurred." };
+      await this.WriteErrorAsync(context, StatusCodes.Status500InternalServerError, errors);
     }
   }
 

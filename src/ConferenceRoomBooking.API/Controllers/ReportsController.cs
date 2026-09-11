@@ -4,6 +4,7 @@ using ConferenceRoomBooking.Application.DTOs;
 using ConferenceRoomBooking.Application.Features.Reports;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ConferenceRoomBooking.API.Controllers;
 
@@ -25,6 +26,7 @@ public class ReportsController : ControllerBase
   /// Повертає виручку, бронювання, завантаженість залів і популярність послуг за період.
   /// </summary>
   [HttpGet("business")]
+  [Authorize(Roles = "Admin")]
   public async Task<ActionResult<BusinessReportDto>> GetBusinessReport([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, CancellationToken cancellationToken)
   {
     BusinessReportDto report = await this._sender.Send(new GetBusinessReportQuery(startDate, endDate), cancellationToken);

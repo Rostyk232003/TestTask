@@ -31,6 +31,13 @@ public class DatabaseSeeder
     await this.UpsertServiceAsync("Wi-Fi", 300m, cancellationToken);
     await this.UpsertServiceAsync("Sound", 700m, cancellationToken);
 
+    await this.EnsureHallServiceAsync("Hall A", "Projector", 500m, cancellationToken);
+    await this.EnsureHallServiceAsync("Hall A", "Wi-Fi", 300m, cancellationToken);
+    await this.EnsureHallServiceAsync("Hall B", "Projector", 500m, cancellationToken);
+    await this.EnsureHallServiceAsync("Hall B", "Wi-Fi", 300m, cancellationToken);
+    await this.EnsureHallServiceAsync("Hall B", "Sound", 700m, cancellationToken);
+    await this.EnsureHallServiceAsync("Hall C", "Wi-Fi", 300m, cancellationToken);
+
     await this._context.SaveChangesAsync(cancellationToken);
   }
 
@@ -58,5 +65,21 @@ public class DatabaseSeeder
     }
 
     service.Update(name, price);
+  }
+
+  private async Task EnsureHallServiceAsync(string hallName, string serviceName, decimal price, CancellationToken cancellationToken)
+  {
+    Hall? hall = await this._context.Halls.FirstOrDefaultAsync(x => x.Name == hallName, cancellationToken);
+    Service? service = await this._context.Services.FirstOrDefaultAsync(x => x.Name == serviceName, cancellationToken);
+    if (hall is null || service is null)
+    {
+      return;
+    }
+
+    bool exists = await this._context.HallServices.AnyAsync(x => x.HallId == hall.Id && x.ServiceId == service.Id, cancellationToken);
+    if (!exists)
+    {
+      await this._context.HallServices.AddAsync(new HallService(hall.Id, service.Id, price), cancellationToken);
+    }
   }
 }

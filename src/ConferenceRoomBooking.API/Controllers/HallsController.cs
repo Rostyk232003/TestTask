@@ -5,6 +5,7 @@ using ConferenceRoomBooking.Application.Interfaces;
 using ConferenceRoomBooking.Application.Features.Halls;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ConferenceRoomBooking.API.Controllers;
 
@@ -28,6 +29,7 @@ public class HallsController : ControllerBase
   /// Створює конференц-зал.
   /// </summary>
   [HttpPost]
+  [Authorize(Roles = "Admin")]
   public async Task<ActionResult<HallDto>> Create(CreateHallRequest request, CancellationToken cancellationToken)
   {
     HallDto result = await this._sender.Send(new CreateHallCommand(request.Name, request.Capacity, request.HourlyRate, request.ServiceIds), cancellationToken);
@@ -38,6 +40,7 @@ public class HallsController : ControllerBase
   /// Оновлює конференц-зал.
   /// </summary>
   [HttpPut("{id:guid}")]
+  [Authorize(Roles = "Admin")]
   public async Task<ActionResult<HallDto>> Update(Guid id, UpdateHallRequest request, CancellationToken cancellationToken)
   {
     HallDto result = await this._sender.Send(new UpdateHallCommand(id, request.Name, request.Capacity, request.HourlyRate, request.ServiceIds), cancellationToken);
@@ -48,6 +51,7 @@ public class HallsController : ControllerBase
   /// Деактивує конференц-зал.
   /// </summary>
   [HttpDelete("{id:guid}")]
+  [Authorize(Roles = "Admin")]
   public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
   {
     await this._sender.Send(new DeleteHallCommand(id), cancellationToken);

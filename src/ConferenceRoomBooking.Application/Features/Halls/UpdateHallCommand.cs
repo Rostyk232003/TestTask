@@ -42,13 +42,13 @@ public class UpdateHallCommandHandler : IRequestHandler<UpdateHallCommand, HallD
     }
 
     hall.Update(command.Name, command.Capacity, command.HourlyRate);
-    hall.HallServices.Clear();
+    List<HallService> hallServices = new List<HallService>();
     foreach (Service service in services)
     {
-      hall.HallServices.Add(new HallService(hall.Id, service.Id, service.Price));
+      hallServices.Add(new HallService(hall.Id, service.Id, service.Price));
     }
 
-    await this._hallRepository.UpdateAsync(hall, cancellationToken);
+    await this._hallRepository.UpdateWithServicesAsync(hall, hallServices, cancellationToken);
     return new HallDto { Id = hall.Id, Name = hall.Name, Capacity = hall.Capacity, HourlyRate = hall.HourlyRate, IsActive = hall.IsActive };
   }
 }

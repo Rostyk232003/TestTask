@@ -56,6 +56,34 @@ public class HallRepository : IHallRepository
     await this._context.SaveChangesAsync(cancellationToken);
   }
 
+  public async Task UpdateWithServicesAsync(Hall hall, List<HallService> hallServices, CancellationToken cancellationToken = default)
+  {
+    Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await this._context.Database.BeginTransactionAsync(cancellationToken);
+    try
+    {
+      List<HallService> existingServices = await this._context.HallServices
+        .Where(x => x.HallId == hall.Id)
+        .ToListAsync(cancellationToken);
+
+      this._context.HallServices.RemoveRange(existingServices);
+      this._context.Halls.Update(hall);
+      await this._context.SaveChangesAsync(cancellationToken);
+
+      await this._context.HallServices.AddRangeAsync(hallServices, cancellationToken);
+      await this._context.SaveChangesAsync(cancellationToken);
+      await transaction.CommitAsync(cancellationToken);
+    }
+    catch
+    {
+      await transaction.RollbackAsync(cancellationToken);
+      throw;
+    }
+    finally
+    {
+      await transaction.DisposeAsync();
+    }
+  }
+
   public async Task DeleteAsync(Hall hall, CancellationToken cancellationToken = default)
   {
     this._context.Halls.Remove(hall);

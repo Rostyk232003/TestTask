@@ -74,6 +74,7 @@ public class AppDbContext : DbContext
       entity.Property(x => x.EndsAt).IsRequired();
       entity.Property(x => x.TotalPrice).HasColumnType("decimal(18,2)");
       entity.Property(x => x.Status).IsRequired().HasMaxLength(50);
+      entity.Property(x => x.Status).HasConversion<string>();
 
       entity.HasMany(x => x.BookingServices)
         .WithOne(x => x.Booking)
@@ -97,15 +98,22 @@ public class AppDbContext : DbContext
 
   private void SeedData(ModelBuilder modelBuilder)
   {
-    Hall hallA = new Hall("Hall A", 50, 2000m);
-    Hall hallB = new Hall("Hall B", 100, 3500m);
-    Hall hallC = new Hall("Hall C", 30, 1500m);
+    modelBuilder.Entity<Hall>().HasData(
+      new { Id = SeedIds.HallA, Name = "Hall A", Capacity = 50, HourlyRate = 2000m, IsActive = true, CreatedAt = new DateTime(2026, 9, 10, 0, 0, 0, DateTimeKind.Utc) },
+      new { Id = SeedIds.HallB, Name = "Hall B", Capacity = 100, HourlyRate = 3500m, IsActive = true, CreatedAt = new DateTime(2026, 9, 10, 0, 0, 0, DateTimeKind.Utc) },
+      new { Id = SeedIds.HallC, Name = "Hall C", Capacity = 30, HourlyRate = 1500m, IsActive = true, CreatedAt = new DateTime(2026, 9, 10, 0, 0, 0, DateTimeKind.Utc) });
 
-    Service projector = new Service("Projector", 500m);
-    Service wifi = new Service("Wi-Fi", 300m);
-    Service sound = new Service("Sound", 700m);
+    modelBuilder.Entity<Service>().HasData(
+      new { Id = SeedIds.Projector, Name = "Projector", Price = 500m },
+      new { Id = SeedIds.Wifi, Name = "Wi-Fi", Price = 300m },
+      new { Id = SeedIds.Sound, Name = "Sound", Price = 700m });
 
-    modelBuilder.Entity<Hall>().HasData(hallA, hallB, hallC);
-    modelBuilder.Entity<Service>().HasData(projector, wifi, sound);
+    modelBuilder.Entity<HallService>().HasData(
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000001"), HallId = SeedIds.HallA, ServiceId = SeedIds.Projector, Price = 500m },
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000002"), HallId = SeedIds.HallA, ServiceId = SeedIds.Wifi, Price = 300m },
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000003"), HallId = SeedIds.HallB, ServiceId = SeedIds.Projector, Price = 500m },
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000004"), HallId = SeedIds.HallB, ServiceId = SeedIds.Wifi, Price = 300m },
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000005"), HallId = SeedIds.HallB, ServiceId = SeedIds.Sound, Price = 700m },
+      new { Id = Guid.Parse("10000000-0000-0000-0000-000000000006"), HallId = SeedIds.HallC, ServiceId = SeedIds.Wifi, Price = 300m });
   }
 }

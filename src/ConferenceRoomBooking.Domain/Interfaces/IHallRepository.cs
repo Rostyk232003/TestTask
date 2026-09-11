@@ -19,5 +19,7 @@ public interface IHallRepository
 
   Task UpdateAsync(Hall hall, CancellationToken cancellationToken = default);
 
+  Task UpdateWithServicesAsync(Hall hall, List<HallService> hallServices, CancellationToken cancellationToken = default);
+
   Task DeleteAsync(Hall hall, CancellationToken cancellationToken = default);
 }

@@ -39,7 +39,7 @@ public class BookHallCommandHandler : IRequestHandler<BookHallCommand, BookingRe
     }
 
     DateTime endTime = command.StartTime.AddHours(command.DurationHours);
-    bool overlaps = hall.Bookings.Any(x => x.Status != "Cancelled" && x.StartsAt < endTime && x.EndsAt > command.StartTime);
+    bool overlaps = hall.Bookings.Any(x => x.Status != BookingStatus.Cancelled && x.StartsAt < endTime && x.EndsAt > command.StartTime);
     if (overlaps)
     {
       throw new ConflictException("Hall is already booked for the requested period.");
@@ -79,7 +79,7 @@ public class BookHallCommandHandler : IRequestHandler<BookHallCommand, BookingRe
       HallPrice = hallPrice,
       ServicesCost = servicesCost,
       TotalPrice = totalPrice,
-      Status = booking.Status,
+      Status = booking.Status.ToString(),
       Message = "Booking created successfully.",
     };
 

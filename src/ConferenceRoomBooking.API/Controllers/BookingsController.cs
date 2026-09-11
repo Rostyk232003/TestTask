@@ -4,6 +4,7 @@ using ConferenceRoomBooking.Application.DTOs;
 using ConferenceRoomBooking.Application.Features.Bookings;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ConferenceRoomBooking.API.Controllers;
 
@@ -25,6 +26,7 @@ public class BookingsController : ControllerBase
   /// Створює бронювання з вибраними послугами та розрахунком вартості.
   /// </summary>
   [HttpPost]
+  [Authorize]
   public async Task<ActionResult<BookingResponseDto>> Create([FromBody] BookHallCommand command, CancellationToken cancellationToken)
   {
     BookingResponseDto result = await this._sender.Send(command, cancellationToken);
