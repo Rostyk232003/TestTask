@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+
+package "Application/Reports (Builder Pattern + CQRS)" {
+
+    class BusinessReport {
+        + StartDate: DateTime
+        + EndDate: DateTime
+        + TotalRevenue: decimal
+        + TotalBookingsCount: int
+        + OccupancyRatePercentage: decimal
+        + MostPopularHallName: string
+        + WorkingHoursSlotStats: Map<string, int>
+        + ToJson(): string
+    }
+
+    interface IReportBuilder {
+        + Reset(): IReportBuilder
+        + SetTimePeriod(startDate: DateTime, endDate: DateTime): IReportBuilder
+        + CalculateRevenue(bookings: List<Booking>): IReportBuilder
+        + CalculateOccupancy(bookings: List<Booking>, totalHalls: int): IReportBuilder
+        + SetMostPopularHall(bookings: List<Booking>, halls: List<Hall>): IReportBuilder
+        + Build(): BusinessReport
+    }
+
+    class BusinessReportBuilder implements IReportBuilder {
+        - _report: BusinessReport
+        + Reset(): IReportBuilder
+        + SetTimePeriod(startDate: DateTime, endDate: DateTime): IReportBuilder
+        + CalculateRevenue(bookings: List<Booking>): IReportBuilder
+        + CalculateOccupancy(bookings: List<Booking>, totalHalls: int): IReportBuilder
+        + SetMostPopularHall(bookings: List<Booking>, halls: List<Hall>): IReportBuilder
+        + Build(): BusinessReport
+    }
+
+    class ReportDirector {
+        - _builder: IReportBuilder
+        + ReportDirector(builder: IReportBuilder)
+        + SetBuilder(builder: IReportBuilder): void
+        + BuildStandardJsonReport(startDate: DateTime, endDate: DateTime, bookings: List<Booking>, halls: List<Hall>): BusinessReport
+    }
+
+    class GetBusinessReportQueryHandler {
+        - _dbContext: AppDbContext
+        + Handle(query: GetBusinessReportQuery, ct: CancellationToken): Task<BusinessReportDto>
+    }
+
+    class GetBusinessReportQuery {
+        + StartDate: DateTime
+        + EndDate: DateTime
+    }
+}
+
+GetBusinessReportQueryHandler ..> GetBusinessReportQuery : "обробляє"
+GetBusinessReportQueryHandler ..> ReportDirector : "використовує як Client"
+GetBusinessReportQueryHandler ..> BusinessReportBuilder : "інстаціює"
+ReportDirector o-> IReportBuilder : "делегує покрокову збірку"
+BusinessReportBuilder ..> BusinessReport : "будує об'єкт (Product)"
+
+note right of BusinessReportBuilder
+  Fluent Builder:
+  Методи повертають IReportBuilder 
+  для зчеплення викликів (Chaining).
+  Обрахунок завантаженості враховує 
+  робочий проміжок 06:00–23:00.
+end note
+
+note top of ReportDirector
+  Опціональний компонент:
+  Фіксує стандартний сценарій 
+  послідовності виклику методів 
+  збирання повного аналітичного звіту.
+end note
+
+@enduml

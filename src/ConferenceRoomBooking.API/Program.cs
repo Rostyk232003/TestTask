@@ -6,15 +6,23 @@ using ConferenceRoomBooking.API.Middleware;
 using ConferenceRoomBooking.Domain.Interfaces;
 using ConferenceRoomBooking.Infrastructure.Persistence;
 using ConferenceRoomBooking.Infrastructure.Repositories;
+using ConferenceRoomBooking.Infrastructure.Reports;
+using ConferenceRoomBooking.Application.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using MediatR;
+using System.Reflection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+});
 builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(CreateHallCommandValidator).Assembly));
 builder.Services.AddValidatorsFromAssemblyContaining<CreateHallCommandValidator>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -31,6 +39,9 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IHallService, HallService>();
 builder.Services.AddScoped<IServiceCatalog, ServiceCatalog>();
+builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+builder.Services.AddScoped<IReportBuilder, BusinessReportBuilder>();
+builder.Services.AddScoped<ReportDirector>();
 builder.Services.AddScoped<IPricingStrategy, TimeSlotPricingStrategy>();
 builder.Services.AddScoped<PricingContext>();
 builder.Services.AddScoped<IPricingService, PricingService>();
