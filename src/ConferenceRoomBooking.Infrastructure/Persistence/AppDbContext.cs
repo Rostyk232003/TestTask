@@ -79,13 +79,13 @@ public class AppDbContext : DbContext
 
   private void SeedData(ModelBuilder modelBuilder)
   {
-    Hall hallA = new Hall("Hall A", 20, 120m);
-    Hall hallB = new Hall("Hall B", 35, 180m);
-    Hall hallC = new Hall("Hall C", 50, 240m);
+    Hall hallA = new Hall("Hall A", 50, 2000m);
+    Hall hallB = new Hall("Hall B", 100, 3500m);
+    Hall hallC = new Hall("Hall C", 30, 1500m);
 
-    Service projector = new Service("Projector", 40m);
-    Service wifi = new Service("Wi-Fi", 15m);
-    Service sound = new Service("Sound", 60m);
+    Service projector = new Service("Projector", 500m);
+    Service wifi = new Service("Wi-Fi", 300m);
+    Service sound = new Service("Sound", 700m);
 
     modelBuilder.Entity<Hall>().HasData(hallA, hallB, hallC);
     modelBuilder.Entity<Service>().HasData(projector, wifi, sound);

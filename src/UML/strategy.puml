@@ -1,0 +1,52 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+
+package "Core/Application (Pricing Strategy)" {
+
+    interface IPricingStrategy {
+        + CalculateHallPrice(startTime: DateTime, durationHours: int, baseHourlyRate: decimal): decimal
+    }
+
+    class TimeSlotPricingStrategy implements IPricingStrategy {
+        - MorningDiscountRate: decimal = 0.10
+        - PeakSurchargeRate: decimal = 0.15
+        - EveningDiscountRate: decimal = 0.20
+        + CalculateHallPrice(startTime: DateTime, durationHours: int, baseHourlyRate: decimal): decimal
+        - GetHourlyRateMultiplier(currentTime: DateTime): decimal
+    }
+
+    class FlatPricingStrategy implements IPricingStrategy {
+        + CalculateHallPrice(startTime: DateTime, durationHours: int, baseHourlyRate: decimal): decimal
+    }
+
+    class PricingContext {
+        - _strategy: IPricingStrategy
+        + PricingContext(strategy: IPricingStrategy)
+        + SetStrategy(strategy: IPricingStrategy): void
+        + CalculateTotalPrice(startTime: DateTime, durationHours: int, baseHourlyRate: decimal, servicesCost: decimal): decimal
+    }
+
+    class Client {
+    }
+}
+
+PricingContext o-> IPricingStrategy : "делегує розрахунок залу"
+Client ..> PricingContext : "створює та використовує"
+Client ..> IPricingStrategy : "інстаціює та передає в сетер/конструктор"
+
+note right of TimeSlotPricingStrategy
+  Рахує ТІЛЬКИ оренду залу:
+  * 06:00-09:00 (-10%)
+  * 09:00-18:00 (Базова ставка)
+  * 12:00-14:00 (+15%)
+  * 18:00-23:00 (-20%)
+end note
+
+note top of PricingContext
+  CalculateTotalPrice додає 
+  фіксовану вартість послуг (servicesCost) 
+  до результату стратегії
+end note
+
+@enduml

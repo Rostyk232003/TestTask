@@ -5,7 +5,7 @@ using ConferenceRoomBooking.Infrastructure.Persistence;
 using ConferenceRoomBooking.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -20,14 +20,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IHallService, HallService>();
+builder.Services.AddScoped<IServiceCatalog, ServiceCatalog>();
+builder.Services.AddScoped<IPricingStrategy, TimeSlotPricingStrategy>();
+builder.Services.AddScoped<PricingContext>();
+builder.Services.AddScoped<IPricingService, PricingService>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
     AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+
+    DatabaseSeeder databaseSeeder = new DatabaseSeeder(context);
+    databaseSeeder.SeedAsync().GetAwaiter().GetResult();
 }
 
 if (app.Environment.IsDevelopment())
