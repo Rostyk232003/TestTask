@@ -3,7 +3,9 @@
 # Історія промптів: фіналізація Conference Room Booking API
 
 ## Стан: [Активна]
+
 ## Версія: v2.2
+
 ## Дата: 2026-09-11
 
 ## Завершені вимоги
@@ -36,6 +38,7 @@
 Проблема: `PUT /api/halls/{id}` повертав `500 DbUpdateConcurrencyException` після `HallServices.Clear()` і graph update через EF Core.
 
 Виправлення:
+
 - додано `UpdateWithServicesAsync` у `IHallRepository`/`HallRepository`;
 - старі `HallService` видаляються явно в транзакції;
 - зал зберігається окремо, після чого додаються нові зв’язки;
@@ -43,6 +46,7 @@
 - збережено atomic update для залу та його послуг.
 
 Перевірка:
+
 - реальний JWT-authenticated PUT повернув `200 OK`;
 - тестовий зал оновлено з `2200` до `2500` грн/год;
 - місткість оновлено з `60` до `70`;
