@@ -11,6 +11,8 @@ public interface IBookingRepository
 {
   Task AddAsync(Booking booking, CancellationToken cancellationToken = default);
 
+  Task<bool> AddIfAvailableAsync(Booking booking, DateTime startsAt, DateTime endsAt, CancellationToken cancellationToken = default);
+
   Task<List<Booking>> GetByHallAndPeriodAsync(Guid hallId, DateTime startsAt, DateTime endsAt, CancellationToken cancellationToken = default);
 
   Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

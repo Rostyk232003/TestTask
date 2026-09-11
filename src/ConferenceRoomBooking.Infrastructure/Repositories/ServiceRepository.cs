@@ -26,4 +26,12 @@ public class ServiceRepository : IServiceRepository
       .OrderBy(x => x.Name)
       .ToListAsync(cancellationToken);
   }
+
+  public async Task<List<Service>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+  {
+    List<Guid> serviceIds = ids.Distinct().ToList();
+    return await this._context.Services
+      .Where(x => serviceIds.Contains(x.Id))
+      .ToListAsync(cancellationToken);
+  }
 }

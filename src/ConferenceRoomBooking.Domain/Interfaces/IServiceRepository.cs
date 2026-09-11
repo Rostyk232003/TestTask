@@ -10,4 +10,6 @@ namespace ConferenceRoomBooking.Domain.Interfaces;
 public interface IServiceRepository
 {
   Task<List<Service>> GetAllAsync(CancellationToken cancellationToken = default);
+
+  Task<List<Service>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 }

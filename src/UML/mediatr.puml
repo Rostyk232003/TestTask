@@ -1,0 +1,103 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+
+package "API Layer (Controllers)" {
+    class HallsController {
+        - _mediator: IMediator
+        + CreateHall(command: CreateHallCommand): Task<IActionResult>
+        + UpdateHall(id: Guid, command: UpdateHallCommand): Task<IActionResult>
+        + DeleteHall(id: Guid): Task<IActionResult>
+        + GetAvailableHalls(query: GetAvailableHallsQuery): Task<IActionResult>
+    }
+
+    class BookingsController {
+        - _mediator: IMediator
+        + BookHall(command: BookHallCommand): Task<IActionResult>
+    }
+}
+
+package "Application Layer (CQRS + MediatR)" {
+
+    interface IMediator {
+        + Send<TResponse>(request: IRequest<TResponse>): Task<TResponse>
+    }
+
+    package "Commands & Queries (Requests)" {
+        class CreateHallCommand implements IRequest_Guid {
+            + Name: string
+            + Capacity: int
+            + BaseHourlyRate: decimal
+            + ServiceIds: List<Guid>
+        }
+        class UpdateHallCommand implements IRequest_Bool {
+            + Id: Guid
+            + BaseHourlyRate: decimal
+            + NewServiceIds: List<Guid>
+        }
+        class DeleteHallCommand implements IRequest_Bool {
+            + Id: Guid
+        }
+        class GetAvailableHallsQuery implements IRequest_HallList {
+            + Date: DateOnly
+            + StartTime: TimeSpan
+            + EndTime: TimeSpan
+            + Capacity: int
+        }
+        class BookHallCommand implements IRequest_BookingResult {
+            + HallId: Guid
+            + BookingDateTime: DateTime
+            + DurationHours: int
+            + SelectedServiceIds: List<Guid>
+        }
+    }
+
+    package "Handlers (Business Logic)" {
+        class CreateHallCommandHandler implements IRequestHandler_CreateHall {
+            + Handle(command: CreateHallCommand, ct: CancellationToken): Task<Guid>
+        }
+        class UpdateHallCommandHandler implements IRequestHandler_UpdateHall
+        class DeleteHallCommandHandler implements IRequestHandler_DeleteHall
+        class GetAvailableHallsQueryHandler implements IRequestHandler_GetAvailableHalls
+        class BookHallCommandHandler implements IRequestHandler_BookHall {
+            - _context: AppDbContext
+            - _pricingContext: PricingContext
+            + Handle(command: BookHallCommand, ct: CancellationToken): Task<BookingConfirmationDto>
+        }
+    }
+
+    package "Domain Pricing Engine" {
+        class PricingContext {
+            + CalculateTotalPrice(...): decimal
+        }
+    }
+}
+
+package "Infrastructure Layer (Persistence)" {
+    class AppDbContext {
+        + Halls: DbSet<Hall>
+        + Bookings: DbSet<Booking>
+        + Services: DbSet<Service>
+    }
+}
+
+HallsController ..> IMediator : "Send(Command/Query)"
+BookingsController ..> IMediator : "Send(BookHallCommand)"
+
+IMediator ..> CreateHallCommandHandler : "диспетчеризує"
+IMediator ..> GetAvailableHallsQueryHandler : "диспетчеризує"
+IMediator ..> BookHallCommandHandler : "диспетчеризує"
+
+BookHallCommandHandler --> PricingContext : "обраховує ціну зі Strategy"
+BookHallCommandHandler --> AppDbContext : "зберігає бронювання"
+CreateHallCommandHandler --> AppDbContext : "додає новий зал"
+GetAvailableHallsQueryHandler --> AppDbContext : "вибірка залів без конфліктів"
+
+note right of BookHallCommandHandler
+  1. Перевіряє наявність залу
+  2. Перевіряє відсутність конфліктних бронювань
+  3. Обчислює підсумкову вартість через PricingContext (Strategy)
+  4. Зберігає запис у базу
+end note
+
+@enduml

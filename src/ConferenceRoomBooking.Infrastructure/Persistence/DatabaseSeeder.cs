@@ -19,6 +19,10 @@ public class DatabaseSeeder
 
   public async Task SeedAsync(CancellationToken cancellationToken = default)
   {
+    await this._context.Database.ExecuteSqlRawAsync(
+      "CREATE TABLE IF NOT EXISTS BookingServices (Id TEXT NOT NULL CONSTRAINT PK_BookingServices PRIMARY KEY, BookingId TEXT NOT NULL, ServiceId TEXT NOT NULL, ServiceName TEXT NOT NULL, UnitPrice decimal(18,2) NOT NULL, CONSTRAINT FK_BookingServices_Bookings_BookingId FOREIGN KEY (BookingId) REFERENCES Bookings (Id) ON DELETE CASCADE, CONSTRAINT FK_BookingServices_Services_ServiceId FOREIGN KEY (ServiceId) REFERENCES Services (Id) ON DELETE RESTRICT);",
+      cancellationToken);
+
     await this.UpsertHallAsync("Hall A", 50, 2000m, cancellationToken);
     await this.UpsertHallAsync("Hall B", 100, 3500m, cancellationToken);
     await this.UpsertHallAsync("Hall C", 30, 1500m, cancellationToken);

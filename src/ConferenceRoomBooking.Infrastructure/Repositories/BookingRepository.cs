@@ -25,6 +25,37 @@ public class BookingRepository : IBookingRepository
     await this._context.SaveChangesAsync(cancellationToken);
   }
 
+  public async Task<bool> AddIfAvailableAsync(Booking booking, DateTime startsAt, DateTime endsAt, CancellationToken cancellationToken = default)
+  {
+    Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await this._context.Database.BeginTransactionAsync(cancellationToken);
+    try
+    {
+      bool overlaps = await this._context.Bookings.AnyAsync(
+        x => x.HallId == booking.HallId && x.Status != "Cancelled" && x.StartsAt < endsAt && x.EndsAt > startsAt,
+        cancellationToken);
+
+      if (overlaps)
+      {
+        await transaction.RollbackAsync(cancellationToken);
+        return false;
+      }
+
+      await this._context.Bookings.AddAsync(booking, cancellationToken);
+      await this._context.SaveChangesAsync(cancellationToken);
+      await transaction.CommitAsync(cancellationToken);
+      return true;
+    }
+    catch
+    {
+      await transaction.RollbackAsync(cancellationToken);
+      throw;
+    }
+    finally
+    {
+      await transaction.DisposeAsync();
+    }
+  }
+
   public async Task<List<Booking>> GetByHallAndPeriodAsync(Guid hallId, DateTime startsAt, DateTime endsAt, CancellationToken cancellationToken = default)
   {
     return await this._context.Bookings

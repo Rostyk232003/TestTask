@@ -7,6 +7,8 @@ namespace ConferenceRoomBooking.Domain.Entities;
 /// </summary>
 public class Booking
 {
+  private readonly List<BookingService> _bookingServices = new List<BookingService>();
+
   public Booking(Guid hallId, DateTime startsAt, DateTime endsAt, decimal totalPrice)
   {
     this.Id = Guid.NewGuid();
@@ -44,6 +46,8 @@ public class Booking
   public DateTime CreatedAt { get; private set; }
 
   public Hall Hall { get; private set; } = null!;
+
+  public ICollection<BookingService> BookingServices => this._bookingServices;
 
   /// <summary>
   /// Скасування бронювання.

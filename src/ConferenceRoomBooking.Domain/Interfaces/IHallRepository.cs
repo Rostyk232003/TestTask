@@ -11,6 +11,8 @@ public interface IHallRepository
 {
   Task<Hall?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+  Task<Hall?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+
   Task<List<Hall>> GetAllAsync(CancellationToken cancellationToken = default);
 
   Task AddAsync(Hall hall, CancellationToken cancellationToken = default);

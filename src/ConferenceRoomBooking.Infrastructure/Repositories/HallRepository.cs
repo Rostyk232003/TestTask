@@ -22,13 +22,24 @@ public class HallRepository : IHallRepository
   public async Task<Hall?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
   {
     return await this._context.Halls
+        .Include(x => x.HallServices)
+        .ThenInclude(x => x.Service)
+        .Include(x => x.Bookings)
         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+  }
+
+  public async Task<Hall?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+  {
+    return await this._context.Halls.FirstOrDefaultAsync(x => x.Name == name, cancellationToken);
   }
 
   public async Task<List<Hall>> GetAllAsync(CancellationToken cancellationToken = default)
   {
     return await this._context.Halls
         .AsNoTracking()
+        .Include(x => x.HallServices)
+        .ThenInclude(x => x.Service)
+        .Include(x => x.Bookings)
         .OrderBy(x => x.Name)
         .ToListAsync(cancellationToken);
   }

@@ -23,6 +23,8 @@ public class AppDbContext : DbContext
 
   public DbSet<Booking> Bookings { get; set; }
 
+  public DbSet<BookingService> BookingServices { get; set; }
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -72,6 +74,22 @@ public class AppDbContext : DbContext
       entity.Property(x => x.EndsAt).IsRequired();
       entity.Property(x => x.TotalPrice).HasColumnType("decimal(18,2)");
       entity.Property(x => x.Status).IsRequired().HasMaxLength(50);
+
+      entity.HasMany(x => x.BookingServices)
+        .WithOne(x => x.Booking)
+        .HasForeignKey(x => x.BookingId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<BookingService>(entity =>
+    {
+      entity.HasKey(x => x.Id);
+      entity.Property(x => x.ServiceName).IsRequired().HasMaxLength(200);
+      entity.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)");
+      entity.HasOne(x => x.Service)
+        .WithMany()
+        .HasForeignKey(x => x.ServiceId)
+        .OnDelete(DeleteBehavior.Restrict);
     });
 
     this.SeedData(modelBuilder);

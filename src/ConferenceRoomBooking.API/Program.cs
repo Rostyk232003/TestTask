@@ -1,15 +1,23 @@
 using ConferenceRoomBooking.Application.Interfaces;
+using ConferenceRoomBooking.Application.Behaviors;
+using ConferenceRoomBooking.Application.Features;
 using ConferenceRoomBooking.Application.Services;
+using ConferenceRoomBooking.API.Middleware;
 using ConferenceRoomBooking.Domain.Interfaces;
 using ConferenceRoomBooking.Infrastructure.Persistence;
 using ConferenceRoomBooking.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using MediatR;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(CreateHallCommandValidator).Assembly));
+builder.Services.AddValidatorsFromAssemblyContaining<CreateHallCommandValidator>();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=conference_booking.db";
 
@@ -44,6 +52,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
